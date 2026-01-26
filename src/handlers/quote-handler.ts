@@ -86,7 +86,7 @@ subscribe('on', Events.ChannelDelete, async (channel) => {
 });
 
 /**
- * Convenience method calling {@link extractQuotees} on every message in a guild channel.
+ * Convenience method calling {@link resolveQuotees} on every message in a guild channel.
  * @returns A mapping of message IDs to arrays of quotees
  */
 export const getAllQuotees = async (channel: GuildTextBasedChannel): Promise<Collection<string, string[]>> => {
