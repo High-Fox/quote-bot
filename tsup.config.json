@@ -1,0 +1,7 @@
+{
+	"entry": ["src/index.ts"],
+	"target": ["esnext", "node23.5"],
+	"format": "esm",
+	"treeshake": true,
+	"tsconfig": "./tsconfig.json"
+}

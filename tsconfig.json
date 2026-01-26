@@ -1,17 +1,21 @@
 {
   "compilerOptions": {
+	"rootDir": "./src",
+    "outDir": "./dist",
     "target": "ESNext",
     "module": "ESNext",
-    "rootDir": "./src",
-    "outDir": "./dist",
 	"moduleResolution": "bundler",
+
+	"noEmit": true,
+	"esModuleInterop": true,
+	"forceConsistentCasingInFileNames": true,
     "removeComments": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+
 	"experimentalDecorators": true,
 	"emitDecoratorMetadata": true,
     "strict": true,
     "strictNullChecks": true,
+
     "skipLibCheck": true
   },
   "exclude": [
