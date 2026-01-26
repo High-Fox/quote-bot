@@ -1,0 +1,38 @@
+{
+  "name": "quote-bot",
+  "version": "1.0.0",
+  "description": "A tracker and scoreboard for Discord quotes. For private use only",
+  "exports": null,
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup src/ --format esm --no-splitting",
+    "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix"
+  },
+  "type": "module",
+  "author": "HighFox",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.3",
+    "meow": "^14.0.0",
+    "reflect-metadata": "^0.2.2",
+    "sequelize": "^6.37.7",
+    "sequelize-typescript": "^2.1.6",
+    "signale": "^1.4.0",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^25.0.3",
+    "@types/signale": "^1.4.7",
+    "@types/validator": "^13.15.10",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.1"
+  }
+}
