@@ -6,7 +6,7 @@ import './database';
 import { handleChatCommand, handleContextMenuCommand } from './handlers/command-handler';
 import './handlers/quote-handler';
 
-const logger = getLogger({}, 'main');
+const logger = getLogger('main');
 export const client = new Client({
 	presence: {
 		activities: [{

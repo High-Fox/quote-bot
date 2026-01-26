@@ -19,8 +19,8 @@ const _defaultSignaleOptions: signale.SignaleOptions = {
 		}
 	}
 }
-export const getLogger = (options: signale.SignaleOptions = {}, ...scope: string[]) => {
-	const logger = new signale.Signale({ ..._defaultSignaleOptions, ...options }); 
+export const getLogger = (...scope: string[]) => {
+	const logger = new signale.Signale({ ..._defaultSignaleOptions });
 	if (!scope.length) {
 		const callerFile = parsePath(getCallSites()[1].scriptName);
 		const callerName = callerFile.name === 'index' ? callerFile.dir.split('/').at(-1)! : callerFile.name;
