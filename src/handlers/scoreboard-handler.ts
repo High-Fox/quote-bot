@@ -4,7 +4,7 @@ import { getAllQuotees } from './quote-handler';
 import { Scoreboard, MemberScore } from '../database/models/';
 import * as db from '../database';
 
-const logger = getLogger();
+const logger = getLogger('scoreboard-handler');
 const RANK_TITLES = ['👑  **Quote Queen**', '🥈  **2nd Place**', '🥉  **3rd Place**'];
 export const SCORE_USER_SELECT = 'scoreUserSelect';
 

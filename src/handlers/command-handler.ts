@@ -5,7 +5,7 @@ import { getLogger } from '../utils';
 import { subscribe } from './event-handler';
 import meow from 'meow';
 
-const logger = getLogger();
+const logger = getLogger('command-handler');
 const rest = new REST({ version: '10' }).setToken(config.DISCORD_TOKEN);
 const commandsData = Object.fromEntries(
 	Object.entries(Commands).map(([key, commands]) => {

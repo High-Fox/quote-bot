@@ -4,7 +4,7 @@ import { subscribe } from './event-handler';
 import { removeScoreboard, updateScoreboard } from './scoreboard-handler';
 import * as db from '../database';
 
-const logger = getLogger();
+const logger = getLogger('quote-handler');
 const MENTION_ID = /(?<=<@)\d{17,19}(?=>)/;
 const MENTION_OR_ME = /<@\d{17,19}>|(?<!\*)\bMe\b/i;
 const UNTIL_MENTION_OR_ME = new RegExp('[-,\\s]+(?=' + MENTION_OR_ME.source + ')', 'i');

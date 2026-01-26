@@ -3,7 +3,7 @@ import { Model, Sequelize } from 'sequelize-typescript';
 import { getLogger } from '../utils';
 import { Scoreboard, MemberScore, ScoredMessage } from './models/';
 
-const logger = getLogger();
+const logger = getLogger('database');
 export const connection = new Sequelize({
 	host: 'localhost',
 	dialect: 'sqlite',

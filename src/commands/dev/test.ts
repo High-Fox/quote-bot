@@ -2,7 +2,7 @@ import { ApplicationCommandType, CommandInteraction, ContainerBuilder, MessageFl
 import { Command } from '..';
 import { getLogger } from '../../utils'
 
-const logger = getLogger();
+const logger = getLogger('command', 'test');
 export const test: Command = {
 	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()

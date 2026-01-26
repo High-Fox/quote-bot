@@ -1,7 +1,7 @@
 import { ClientEvents, Client } from 'discord.js';
 import { getLogger } from '../utils';
 
-const logger = getLogger();
+const logger = getLogger('event-handler');
 type EventListener<Event extends keyof ClientEvents> = (...args: ClientEvents[Event]) => void;
 type ListenerType = 'on' | 'once';
 const eventHandlers: {

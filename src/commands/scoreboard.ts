@@ -4,7 +4,7 @@ import { getLogger } from '../utils';
 import { removeScoreboard, setupScoreboard } from '../handlers/scoreboard-handler';
 import * as db from '../database';
 
-const logger = getLogger();
+const logger = getLogger('command', 'scoreboard');
 export const scoreboard: Command = {
 	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
