@@ -1,4 +1,4 @@
-import { ApplicationCommandType, ChatInputCommandInteraction, GuildMessageManager, GuildTextBasedChannel, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { ApplicationCommandType, ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { Command } from '.';
 import { getLogger } from '../utils';
 import { removeScoreboard, setupScoreboard } from '../handlers/scoreboard-handler';
@@ -22,7 +22,7 @@ export const scoreboard: Command = {
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels | PermissionFlagsBits.ManageMessages),
 	execute: {
-		create: async (interaction: ChatInputCommandInteraction) => {
+		create: async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {
 			if (await db.getScoreboard(interaction.channelId))
 				return interaction.reply({ content: 'A scoreboard already exists in this channel.', flags: MessageFlags.Ephemeral });
 			if (!interaction.channel)
@@ -31,26 +31,29 @@ export const scoreboard: Command = {
 			await interaction.deferReply();
 			const replyMessage = await interaction.fetchReply();
 			try {
-				return setupScoreboard(interaction.channel as GuildTextBasedChannel, replyMessage)
+				return setupScoreboard(interaction.channel, replyMessage)
 					.then(reply => interaction.editReply(reply));
 			} catch (error) {
 				logger.error(error);
 				return interaction.editReply('An error occured while creating the scoreboard.');
 			}
 		},
-		delete: async (interaction: ChatInputCommandInteraction) => {
+		delete: async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 			const scoreboard = await db.getScoreboard(interaction.channelId!);
 			if (!scoreboard)
 				return interaction.editReply('No scoreboard exists in this channel.');
+			if (!interaction.channel)
+				throw new Error('Channel not present in interaction object.');
 
-			return removeScoreboard(scoreboard, interaction.channel!.messages as GuildMessageManager)
-				.then(() => interaction.editReply('Scoreboard deleted successfully!'))
-				.catch(error => {
-					logger.error(error);
-					return interaction.editReply('An error occurred while deleting the scoreboard.');
-				});
+			try {
+				return removeScoreboard(scoreboard, interaction.channel.messages)
+					.then(() => interaction.editReply('Scoreboard deleted successfully!'));
+			} catch (error) {
+				logger.error(error);
+				return interaction.editReply('An error occurred while deleting the scoreboard.');
+			}
 		}
 	}
 }
