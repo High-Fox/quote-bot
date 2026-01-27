@@ -7,19 +7,19 @@ import meow from 'meow';
 
 const logger = getLogger('command-handler');
 const rest = new REST({ version: '10' }).setToken(config.DISCORD_TOKEN);
-const commandsData = Object.fromEntries(
+const commandsData = () => Object.fromEntries(
 	Object.entries(Commands).map(([key, commands]) => {
 		const data = Object.values(commands).map(command => command.data.toJSON());
 		return [key, data];
 	})
 );
 
-const hasSubcommands = (command: ChatCommand): command is SubcommandsCommand => {
-	return typeof command.execute !== 'function';
-}
-
 const getCommandsFor = (guildId: string): CommandSet => {
 	return guildId === config.DEV_GUILD_ID ? Commands.DEV : Commands.USER;
+}
+
+const hasSubcommands = (command: ChatCommand): command is SubcommandsCommand => {
+	return typeof command.execute !== 'function';
 }
 
 subscribe('once', Events.ClientReady, async () => {
@@ -88,7 +88,7 @@ const deployToGuild = async ({ guildId, scope = CommandScopes.USER }: GuildDeplo
 		logger.await(`Refreshing ${scope} slash commands for guild with ID ${guildId} ...`);
 
 		await rest.put(
-			Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), { body: commandsData[scope] }
+			Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), { body: commandsData()[scope] }
 		);
 
 		logger.success('Done!');
@@ -102,7 +102,7 @@ const deployGlobally = async ({ scope = CommandScopes.USER }: DeployOptions = {}
 		logger.await(`Refreshing ${scope} global slash commands ...`);
 
 		await rest.put(
-			Routes.applicationCommands(config.DISCORD_CLIENT_ID), { body: commandsData[scope] }
+			Routes.applicationCommands(config.DISCORD_CLIENT_ID), { body: commandsData()[scope] }
 		);
 
 		logger.success('Done!');
