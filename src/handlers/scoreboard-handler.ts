@@ -1,4 +1,4 @@
-import { ActionRowBuilder, Embed, EmbedBuilder, GuildMessageManager, GuildTextBasedChannel, InteractionEditReplyOptions, Message, MessageManager, userMention, UserSelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, DiscordjsTypeError, Embed, EmbedBuilder, GuildMessageManager, GuildTextBasedChannel, InteractionEditReplyOptions, Message, MessageManager, userMention, UserSelectMenuBuilder } from 'discord.js';
 import { frequencyScore, getLogger, randomColor } from '../utils';
 import { getAllQuotees } from './quote-handler';
 import { Scoreboard, MemberScore } from '../database/models/';
@@ -53,17 +53,24 @@ export const updateScoreboard = async (channelId: string, messages: MessageManag
 		return;
 
 	const topMembers = await getTopMembers(scoreboard);
-	await messages.fetch(scoreboard.messageId).then(message => {
-		const embed = createEmbed(topMembers, message.embeds[0]);
-		return message.edit({ embeds: [embed] });
-	});
+	try {
+		await messages.fetch(scoreboard.messageId).then(message => {
+			const embed = createEmbed(topMembers, message.embeds[0]);
+			return message.edit({ embeds: [embed] });
+		});
+	} catch (error) {
+		logger.error('Error updating scoreboard: %s.', error);
+	}
 }
 
 export const removeScoreboard = async (scoreboard: Scoreboard, messages?: GuildMessageManager) => {
-	if (messages) {
-		await messages.fetch(scoreboard.messageId)
-			.then(message => message.delete())
-			.catch(() => logger.error('Error fetching scoreboard message in channel %s, probably already deleted', scoreboard.channelId));
+	try {
+		if (messages)
+			await messages.delete(scoreboard.messageId);
+	} catch (error) {
+		if (error instanceof DiscordjsTypeError)
+			logger.error('Error fetching scoreboard message, probably already deleted.')
+		else throw error;
 	}
 	return scoreboard.destroy();
 }
