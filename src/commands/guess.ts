@@ -6,6 +6,40 @@ import { Scoreboard } from '../database/models/';
 import * as db from '../database';
 
 const GUESS_USER_SELECT = 'guessUserSelect';
+
+export const guess: Command = {
+	type: ApplicationCommandType.ChatInput,
+	data: new SlashCommandBuilder()
+		.setName('guess')
+		.setDescription('Guess who said a quote!'),
+	execute: async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		const replyMessage = await interaction.fetchReply();
+
+		const scoreboard = await db.getScoreboard(interaction.channelId);
+		if (!scoreboard)
+			return interaction.editReply('No scoreboard exists in this channel.');
+		if (!interaction.channel)
+			throw new Error('Channel not present in interaction object.');
+
+		const quote = await getRandomQuote(scoreboard, interaction.channel.messages);
+		await interaction.editReply({
+			components: createQuestionComponents(quote),
+			flags: MessageFlags.IsComponentsV2
+		});
+
+		await replyMessage.awaitMessageComponent<ComponentType.UserSelect>({ filter: (componentInteraction) => {
+			return componentInteraction.customId === GUESS_USER_SELECT && componentInteraction.user.id === interaction.user.id;
+		}, time: 60_000})
+			.then(response => response.update({ components: createAnswerComponents(quote, response.values) }))
+			.catch(() => {
+				const timeoutComponent = containerBase('Red')
+					.addTextDisplayComponents(textDisplay => textDisplay.setContent('Timed out due to no response.'));
+				return interaction.editReply({ components: [timeoutComponent] });
+			});
+	}
+}
+
 const getRandomQuote = async (scoreboard: Scoreboard, messages: GuildMessageManager) => {
 	const scoredMessage = await scoreboard.$get('scoredMessages', {
 		attributes: ['messageId'],
@@ -15,7 +49,6 @@ const getRandomQuote = async (scoreboard: Scoreboard, messages: GuildMessageMana
 	
 	const quotes = await messages.fetch(scoredMessage.messageId)
 		.then(message => resolveQuoteTuples(message));
-	// Todo: add error handling in the case of null discord message or db object
 
 	return quotes[Math.floor(Math.random() * quotes.length)];
 }
@@ -55,37 +88,4 @@ const createAnswerComponents = ([quote, quotees]: QuoteTuple, selectedUsers: str
 		);
 	
 	return [container];
-}
-
-export const guess: Command = {
-	type: ApplicationCommandType.ChatInput,
-	data: new SlashCommandBuilder()
-		.setName('guess')
-		.setDescription('Guess who said a quote!'),
-	execute: async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {
-		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-		const replyMessage = await interaction.fetchReply();
-
-		const scoreboard = await db.getScoreboard(interaction.channelId);
-		if (!scoreboard)
-			return interaction.editReply('No scoreboard exists in this channel.');
-		if (!interaction.channel)
-			throw new Error('Channel not present in interaction object.');
-
-		const quote = await getRandomQuote(scoreboard, interaction.channel.messages);
-		await interaction.editReply({
-			components: createQuestionComponents(quote),
-			flags: MessageFlags.IsComponentsV2
-		});
-
-		await replyMessage.awaitMessageComponent<ComponentType.UserSelect>({ filter: (componentInteraction) => {
-			return componentInteraction.customId === GUESS_USER_SELECT && componentInteraction.user.id === interaction.user.id;
-		}, time: 60_000})
-			.then(response => response.update({ components: createAnswerComponents(quote, response.values) }))
-			.catch(() => {
-				const timeoutComponent = containerBase('Red')
-					.addTextDisplayComponents(textDisplay => textDisplay.setContent('Timed out due to no response.'));
-				return interaction.editReply({ components: [timeoutComponent] });
-			});
-	}
 }

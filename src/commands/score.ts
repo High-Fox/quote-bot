@@ -6,25 +6,6 @@ import { Scoreboard } from '../database/models/';
 import { SCORE_USER_SELECT } from '../handlers/scoreboard-handler';
 import * as db from '../database';
 
-const createComponents = async (scoreboard: Scoreboard, user: User) => {
-	const { score: memberScore, rank: memberRank } = await db.getMemberScore(scoreboard, user.id)
-		.then(instance => instance ? instance.get() : { score: 0, rank: undefined });
-	let text = `**${user.displayName}** has **${memberScore} quotes** in ${channelMention(scoreboard.channelId)}`;
-	if (memberRank)
-		text += `\n\nThey are ranked ${ordinalSuffix(memberRank)}!`;
-
-	const container = containerBase()
-		.addSectionComponents(section => {
-			const avatar = user.avatarURL();
-			if (avatar)
-				section.setThumbnailAccessory(thumbnail => thumbnail.setURL(avatar));
-			return section
-				.addTextDisplayComponents(textDisplay => textDisplay.setContent(text));
-		});
-
-	return [container];
-}
-
 export const score: Command = {
 	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
@@ -69,3 +50,22 @@ subscribe('on', Events.InteractionCreate, async (interaction) => {
 			}));
 	}
 });
+
+const createComponents = async (scoreboard: Scoreboard, user: User) => {
+	const { score: memberScore, rank: memberRank } = await db.getMemberScore(scoreboard, user.id)
+		.then(instance => instance ? instance.get() : { score: 0, rank: undefined });
+	let text = `**${user.displayName}** has **${memberScore} quotes** in ${channelMention(scoreboard.channelId)}`;
+	if (memberRank)
+		text += `\n\nThey are ranked ${ordinalSuffix(memberRank)}!`;
+
+	const container = containerBase()
+		.addSectionComponents(section => {
+			const avatar = user.avatarURL();
+			if (avatar)
+				section.setThumbnailAccessory(thumbnail => thumbnail.setURL(avatar));
+			return section
+				.addTextDisplayComponents(textDisplay => textDisplay.setContent(text));
+		});
+
+	return [container];
+}
