@@ -37,12 +37,11 @@ const devCommands = { test };
 
 export enum CommandScopes {
 	USER = 'USER',
-	DEV = 'DEV',
-	ALL = 'ALL',
+	DEV = 'DEV'
 };
 export type CommandScope = keyof typeof CommandScopes;
 export const Commands = {
-	USER: { ...commands },
-	DEV: { ...devCommands },
-	ALL: { ...commands, ...devCommands }
+	[CommandScopes.USER]: { ...commands },
+	[CommandScopes.DEV]: { ...devCommands, ...commands }
 } as const;
+export type CommandSet = typeof Commands[CommandScope];

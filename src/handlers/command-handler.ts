@@ -1,6 +1,6 @@
 import { ApplicationCommandType, ChatInputCommandInteraction, ContextMenuCommandInteraction, Events, REST, Routes } from 'discord.js';
 import { config } from '../config';
-import { ChatCommand, Commands, CommandScopes, CommandScope, SubcommandsCommand } from '../commands';
+import { ChatCommand, Commands, CommandScopes, CommandScope, SubcommandsCommand, CommandSet } from '../commands';
 import { getLogger } from '../utils';
 import { subscribe } from './event-handler';
 import meow from 'meow';
@@ -18,6 +18,10 @@ const hasSubcommands = (command: ChatCommand): command is SubcommandsCommand => 
 	return typeof command.execute !== 'function';
 }
 
+const getCommandsFor = (guildId: string): CommandSet => {
+	return guildId === config.DEV_GUILD_ID ? Commands.DEV : Commands.USER;
+}
+
 subscribe('once', Events.ClientReady, async () => {
 	const { flags } = meow({
 		importMeta: import.meta,
@@ -30,15 +34,15 @@ subscribe('once', Events.ClientReady, async () => {
 	});
 	if (flags.deployCommands) {
 		if (flags.deployCommands === 'dev')
-			deployToGuild({ guildId: config.DEV_GUILD_ID, scope: CommandScopes.ALL})
+			deployToGuild({ guildId: config.DEV_GUILD_ID, scope: CommandScopes.DEV})
 		else
 			deployGlobally();
 	}
 });
 
 export const handleChatCommand = async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {
-	const { commandName, options, guild } = interaction;
-	const commands = guild?.id === config.DEV_GUILD_ID ? Commands.ALL : Commands.USER;
+	const { commandName, options, guildId } = interaction;
+	const commands = getCommandsFor(guildId);
 	const command = commands[commandName as keyof typeof commands];
 
 	if (!command || command.type !== ApplicationCommandType.ChatInput)
@@ -61,8 +65,8 @@ export const handleChatCommand = async (interaction: ChatInputCommandInteraction
 }
 
 export const handleContextMenuCommand = async (interaction: ContextMenuCommandInteraction<'raw' | 'cached'>) => {
-	const { commandName, guild } = interaction;
-	const commands = guild?.id === config.DEV_GUILD_ID ? Commands.ALL : Commands.USER;
+	const { commandName, guildId } = interaction;
+	const commands = getCommandsFor(guildId);
 	const command = commands[commandName as keyof typeof commands];
 
 	if (!command)
