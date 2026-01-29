@@ -24,6 +24,14 @@ type RequiredAttributes<T extends Model> = Exclude<Exclude<keyof T, keyof Model>
 type ModelAttributes<T extends Model, Options extends { omit?: keyof Attributes<T> } = { omit: never }> = 
 	Pick<T, Exclude<RequiredAttributes<Attributes<T>>, Options['omit']>>;
 
+export const hasScoreboard = (channelId: string) => {
+	return Scoreboard.count({
+		where: {
+			channelId: channelId
+		}
+	}).then(count => count !== 0);
+}
+
 export const getScoreboard = (channelId: string) => {
 	return Scoreboard.findByPk(channelId);
 }

@@ -23,7 +23,7 @@ export const scoreboard: Command = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels | PermissionFlagsBits.ManageMessages),
 	execute: {
 		create: async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {
-			if (await db.getScoreboard(interaction.channelId))
+			if (await db.hasScoreboard(interaction.channelId))
 				return interaction.reply({ content: 'A scoreboard already exists in this channel.', flags: MessageFlags.Ephemeral });
 			if (!interaction.channel)
 				throw new Error('Channel not present in interaction object.');
