@@ -1,11 +1,10 @@
-import { ApplicationCommandType, ChatInputCommandInteraction, CommandInteraction, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction,RESTPostAPIBaseApplicationCommandsJSONBody, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder, UserContextMenuCommandInteraction } from 'discord.js';
+import { ApplicationCommandType, ChatInputCommandInteraction, CommandInteraction, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, RESTPostAPIBaseApplicationCommandsJSONBody, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder, UserContextMenuCommandInteraction } from 'discord.js';
 import { scoreboard } from './scoreboard';
 import { test } from './dev/test';
 import { score } from './score';
 import { guess } from './guess';
 import { check } from './check';
 
-// i realize this setup is messy and not ideal, but idc to remake it.
 type CommandFunction<T extends CommandInteraction<'raw' | 'cached'>> = (interaction: T) => Promise<unknown>;
 interface SerializableCommand<Data extends { toJSON(): RESTPostAPIBaseApplicationCommandsJSONBody }> {
 	type: ApplicationCommandType,
@@ -37,11 +36,13 @@ const devCommands = { test };
 
 export enum CommandScopes {
 	USER = 'USER',
-	DEV = 'DEV'
+	DEV = 'DEV',
+	ALL = 'ALL'
 };
 export type CommandScope = keyof typeof CommandScopes;
-export const Commands = {
+export const Commands: Record<CommandScope, Record<string, Command>> = {
 	[CommandScopes.USER]: { ...commands },
-	[CommandScopes.DEV]: { ...devCommands, ...commands }
+	[CommandScopes.DEV]: { ...devCommands },
+	[CommandScopes.ALL]: { ...commands, ...devCommands }
 } as const;
 export type CommandSet = typeof Commands[CommandScope];

@@ -1,21 +1,21 @@
-import { ApplicationCommandType, ChatInputCommandInteraction, ContextMenuCommandInteraction, Events, REST, Routes } from 'discord.js';
+import { ApplicationCommandType, ChatInputCommandInteraction, ContextMenuCommandInteraction, Events, InteractionContextType, REST, Routes } from 'discord.js';
+import { typeFlag } from 'type-flag';
 import { config } from '../config';
 import { ChatCommand, Commands, CommandScopes, CommandScope, SubcommandsCommand, CommandSet } from '../commands';
 import { getLogger } from '../utils';
 import { subscribe } from './event-handler';
-import meow from 'meow';
 
 const logger = getLogger('command-handler');
 const rest = new REST({ version: '10' }).setToken(config.DISCORD_TOKEN);
 const commandsData = () => Object.fromEntries(
 	Object.entries(Commands).map(([key, commands]) => {
-		const data = Object.values(commands).map(command => command.data.toJSON());
+		const data = Object.values(commands).map(command => command.data.setContexts(InteractionContextType.Guild).toJSON());
 		return [key, data];
 	})
 );
 
 const getCommandsFor = (guildId: string): CommandSet => {
-	return guildId === config.DEV_GUILD_ID ? Commands.DEV : Commands.USER;
+	return guildId === config.DEV_GUILD_ID ? Commands.ALL : Commands.USER;
 }
 
 const hasSubcommands = (command: ChatCommand): command is SubcommandsCommand => {
@@ -23,21 +23,19 @@ const hasSubcommands = (command: ChatCommand): command is SubcommandsCommand => 
 }
 
 subscribe('once', Events.ClientReady, async () => {
-	const { flags } = meow({
-		importMeta: import.meta,
-		flags: {
-			deployCommands: {
-				type: 'string',
-				choices: ['dev', 'global']
-			}
-		}
+	const deployScopes = ['dev', 'global'] as const;
+	const { flags } = typeFlag({
+		deployCommands: [(scope: typeof deployScopes[number]) => {
+			if (!deployScopes.includes(scope))
+				throw new Error(`Invalid value for deployCommands flag: '${scope}'`);
+			return scope;
+		}]
 	});
-	if (flags.deployCommands) {
-		if (flags.deployCommands === 'dev')
-			deployToGuild({ guildId: config.DEV_GUILD_ID, scope: CommandScopes.DEV})
-		else
-			deployGlobally();
-	}
+	
+	if (flags.deployCommands.includes('dev'))
+		await deployToGuild({ guildId: config.DEV_GUILD_ID, scope: CommandScopes.DEV});
+	if (flags.deployCommands.includes('global'))
+		await deployGlobally();
 });
 
 export const handleChatCommand = async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {
@@ -80,32 +78,28 @@ export const handleContextMenuCommand = async (interaction: ContextMenuCommandIn
 		throw new Error(`Command type mismatch: Command ${commandName} is of type ${command.type}, but interaction is of type ${interaction.commandType}.`);
 }
 
-interface DeployOptions { scope?: CommandScope }
+interface DeployOptions { scope: CommandScope }
 interface GuildDeployOptions extends DeployOptions { guildId: string }
 
-const deployToGuild = async ({ guildId, scope = CommandScopes.USER }: GuildDeployOptions) => {
+const deployToGuild = async ({ guildId, scope }: GuildDeployOptions) => {
 	try {
-		logger.await(`Refreshing ${scope} slash commands for guild with ID ${guildId} ...`);
-
 		await rest.put(
 			Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), { body: commandsData()[scope] }
 		);
 
-		logger.success('Done!');
+		logger.success(`Updated ${scope} slash commands for guild with ID ${guildId}.`);
 	} catch (error) {
 		logger.error(error);
 	}
 }
 
-const deployGlobally = async ({ scope = CommandScopes.USER }: DeployOptions = {}) => {
+const deployGlobally = async ({ scope }: DeployOptions = { scope: CommandScopes.USER }) => {
 	try {
-		logger.await(`Refreshing ${scope} global slash commands ...`);
-
 		await rest.put(
 			Routes.applicationCommands(config.DISCORD_CLIENT_ID), { body: commandsData()[scope] }
 		);
 
-		logger.success('Done!');
+		logger.success(`Updated ${scope} global slash commands.`);
 	} catch (error) {
 		logger.error(error);
 	}

@@ -35,11 +35,11 @@ subscribe('on', Events.InteractionCreate, async (interaction) => {
 				handleContextMenuCommand(interaction);
 		} catch (error) {
 			logger.error(error);
-			const reply = 'An error occured while executing the command.';
+			const content = 'An error occured while executing the command.';
 			if (interaction.deferred || interaction.replied)
-				interaction.editReply(reply);
+				interaction.editReply(content);
 			else
-				interaction.reply({ content: reply, flags: MessageFlags.Ephemeral });
+				interaction.reply({ content, flags: MessageFlags.Ephemeral });
 		}
 	}
 });
