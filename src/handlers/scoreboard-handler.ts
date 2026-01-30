@@ -1,4 +1,4 @@
-import { ActionRowBuilder, DiscordjsTypeError, Embed, EmbedBuilder, GuildMessageManager, GuildTextBasedChannel, InteractionEditReplyOptions, Message, MessageManager, userMention, UserSelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, DiscordAPIError, Embed, EmbedBuilder, GuildMessageManager, GuildTextBasedChannel, InteractionEditReplyOptions, Message, MessageManager, userMention, UserSelectMenuBuilder } from 'discord.js';
 import { frequencyScore, getLogger, randomColor } from '../utils';
 import { getAllQuotees } from './quote-handler';
 import { Scoreboard, MemberScore } from '../database/models/';
@@ -68,7 +68,7 @@ export const removeScoreboard = async (scoreboard: Scoreboard, messages?: GuildM
 		if (messages)
 			await messages.delete(scoreboard.messageId);
 	} catch (error) {
-		if (error instanceof DiscordjsTypeError)
+		if (error instanceof DiscordAPIError)
 			logger.error('Error fetching scoreboard message, probably already deleted.')
 		else throw error;
 	}
