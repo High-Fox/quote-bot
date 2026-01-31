@@ -28,15 +28,19 @@ export const guess: Command = {
 			flags: MessageFlags.IsComponentsV2
 		});
 
-		await replyMessage.awaitMessageComponent<ComponentType.UserSelect>({ filter: (componentInteraction) => {
-			return componentInteraction.customId === GUESS_USER_SELECT && componentInteraction.user.id === interaction.user.id;
-		}, time: 60_000})
-			.then(response => response.update({ components: createAnswerComponents(quote, response.values) }))
-			.catch(() => {
-				const timeoutComponent = containerBase('Red')
-					.addTextDisplayComponents(textDisplay => textDisplay.setContent('Timed out due to no response.'));
-				return interaction.editReply({ components: [timeoutComponent] });
+		await replyMessage.awaitMessageComponent<ComponentType.UserSelect>({
+			filter: (componentInteraction) => componentInteraction.user.id === interaction.user.id && 
+				componentInteraction.customId === GUESS_USER_SELECT,
+			idle: 30_000
+		}).then(response => {
+			return response.update({
+				components: createAnswerComponents(quote, response.values)
 			});
+		}).catch(() => {
+			const timeoutComponent = containerBase('Red')
+				.addTextDisplayComponents(textDisplay => textDisplay.setContent('Timed out due to no response.'));
+			return interaction.editReply({ components: [timeoutComponent] });
+		});
 	}
 }
 

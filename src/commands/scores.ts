@@ -29,21 +29,18 @@ export const scores: Command = {
 			flags: MessageFlags.IsComponentsV2
 		});
 
-		const collector = replyMessage.createMessageComponentCollector({
+		replyMessage.createMessageComponentCollector({
 			componentType: ComponentType.Button,
 			filter: (button) => button.user.id === interaction.user.id && 
 				(button.customId === SCORES_NEXT_PAGE || button.customId === SCORES_PREVIOUS_PAGE),
 			idle: 35_000
-		});
-
-		collector.on('collect', async (componentInteraction) => {
+		}).on('collect', async (componentInteraction) => {
 			await componentInteraction.deferUpdate();
 			page += componentInteraction.customId === SCORES_NEXT_PAGE ? 1 : -1;
 			await componentInteraction.update({
 				components: createComponents(pagedScores, page)
 			});
-		});
-		collector.once('end', async () => {
+		}).once('end', async () => {
 			await interaction.deleteReply();
 		});
 	}
