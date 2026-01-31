@@ -87,7 +87,7 @@ subscribe('on', Events.ChannelDelete, async (channel) => {
 
 /**
  * Convenience method calling {@link resolveQuotees} on every message in a guild channel.
- * @returns A mapping of message IDs to arrays of quotees
+ * @returns A mapping of message IDs to arrays of quotees.
  */
 export const getAllQuotees = async (channel: GuildTextBasedChannel): Promise<Collection<string, string[]>> => {
 	const quotees = new Collection<string, string[]>();
@@ -105,6 +105,10 @@ export const getAllQuotees = async (channel: GuildTextBasedChannel): Promise<Col
 	return quotees;
 }
 
+/**
+ * Splits the given string at the start of all pairs of quotes.
+ * @returns An array of strings. Each element starts with a quote.
+ */
 export const splitAtQuotes = (text: string): string[] => {
 	const sections: string[] = [];
 	const quoteIndexes = (text.match(QUOTES) ?? []).map(match => text.indexOf(match));
@@ -118,7 +122,7 @@ export const splitAtQuotes = (text: string): string[] => {
 /**
  * Extracts any quotes found in a message object and resolves the assigned quotees to their
  * respective user IDs.
- * @returns An array of tuples, each containing a quote and an array of the user IDs assigned to it (allowing duplicates)
+ * @returns An array of tuples, each containing a quote and an array of the user IDs assigned to it (allowing duplicates).
  */
 export const resolveQuoteTuples = async ({ content, guild, author }: Message<true>): Promise<QuoteTuple[]> => {
 	return Promise.all(
@@ -130,7 +134,7 @@ export const resolveQuoteTuples = async ({ content, guild, author }: Message<tru
 
 /**
  * Resolves the quotees found in a message object to their respective user IDs.
- * @returns An array of user IDs (allowing duplicates)
+ * @returns An array of user IDs (allowing duplicates).
  */
 const resolveQuotees = async ({ content, guild, author }: Message<true>): Promise<string[]> => {
 	const quotees = extractQuotees(content);
@@ -141,7 +145,7 @@ const resolveQuotees = async ({ content, guild, author }: Message<true>): Promis
 
 /**
  * Extracts any quotees assigned AFTER any quotes within a string.
- * @returns An array of quotee names (allowing duplicates)
+ * @returns An array of quotee names (allowing duplicates).
  */
 export const extractQuotees = (text: string): string[] => {
 	const inlinedText = collapseText(text);

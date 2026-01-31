@@ -51,6 +51,9 @@ export const frequencyScore = <Type>(input: Type[]): Map<Type, number> => {
 	return map;
 }
 
+/**
+ * Removes any leading/trailing whitespace and replaces any line breaks with spaces.
+ */
 export const collapseText = (text: string) => {
 	return text
 		.replace(/[\s\xa0]+/g, ' ')
