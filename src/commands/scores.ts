@@ -3,7 +3,6 @@ import { Command } from ".";
 import * as db from '../database'
 import { MemberScore, Scoreboard } from "../database/models";
 import { containerBase } from "../utils";
-import { Sequelize } from "sequelize";
 
 const SCORES_NEXT_PAGE = 'scoresNextPage';
 const SCORES_PREVIOUS_PAGE = 'scoresPrevPage';
@@ -49,12 +48,11 @@ export const scores: Command = {
 const createComponents = (pagedScores: MemberScore[][], page: number) => {
 	const container = containerBase()
 		.addTextDisplayComponents(textDisplay => textDisplay.setContent('## 🏆  Scores'))
-		.addSeparatorComponents(seperator => seperator.setDivider(false))
+		.addSeparatorComponents(seperator => seperator)
 		.addTextDisplayComponents(textDisplay => textDisplay.setContent(
 			pagedScores[page]
-				.map(memberScore => memberScore.get())
-				.reduce((text, { memberId, score, rank }) => {
-					return text + `${rank}. ${userMention(memberId)} - **${score} Quotes**\n`;
+				.reduce((text, { memberId, score }, index) => {
+					return text + `${page * SCORES_PER_PAGE + index + 1}. ${userMention(memberId)} - **${score} Quotes**\n`;
 				}, '')
 		));
 	const actionRow = new ActionRowBuilder<ButtonBuilder>()
@@ -75,11 +73,6 @@ const createComponents = (pagedScores: MemberScore[][], page: number) => {
 
 const getPagedScores = (scoreboard: Scoreboard) => {
 	return scoreboard.$get('memberScores', {
-		attributes: {
-			include: [
-				[Sequelize.literal('(RANK() OVER (ORDER BY score DESC))'), 'rank']
-			]
-		},
 		order: [['score', 'DESC']]
 	}).then(results => {
 		return results.reduce((pages, score, index) => {
