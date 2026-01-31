@@ -1,4 +1,4 @@
-import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MessageFlags, SlashCommandBuilder, User } from 'discord.js';
+import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MediaGalleryBuilder, MessageFlags, SlashCommandBuilder, User } from 'discord.js';
 import { Command } from '.';
 import { containerBase, ordinalSuffix } from '../utils';
 import { subscribe } from '../handlers/event-handler';
@@ -52,11 +52,13 @@ subscribe('on', Events.InteractionCreate, async (interaction) => {
 });
 
 const createComponents = async (scoreboard: Scoreboard, user: User) => {
-	const { score: memberScore, rank: memberRank } = await db.getMemberScore(scoreboard, user.id)
-		.then(instance => instance ? instance.get() : { score: 0, rank: undefined });
-	let text = `**${user.displayName}** has **${memberScore} quotes** in ${channelMention(scoreboard.channelId)}`;
-	if (memberRank)
-		text += `\n\nThey are ranked ${ordinalSuffix(memberRank)}!`;
+	const memberScore = await db.getMemberScore(scoreboard, user.id)
+		.then(instance => instance ? instance.get() : null);
+	if (!memberScore)
+		return [new MediaGalleryBuilder().addItems(galleryItem => galleryItem.setURL('https://en.meming.world/images/en/0/03/I%27ve_Never_Met_This_Man_In_My_Life.jpg'))];
+	let text = `**${user.displayName}** has **${memberScore.score} quotes** in ${channelMention(scoreboard.channelId)}`;
+	if (memberScore.rank)
+		text += `\n\nThey are ranked ${ordinalSuffix(memberScore.rank)}!`;
 
 	const container = containerBase()
 		.addSectionComponents(section => {
