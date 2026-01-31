@@ -2,6 +2,7 @@ import { ApplicationCommandType, ChatInputCommandInteraction, CommandInteraction
 import { scoreboard } from './scoreboard';
 import { test } from './dev/test';
 import { score } from './score';
+import { scores } from './scores';
 import { guess } from './guess';
 import { check } from './check';
 
@@ -31,7 +32,7 @@ export type ChatCommand = BasicCommand | SubcommandsCommand;
 export type ContextMenuCommand = MessageContextMenuCommand | UserContextMenuCommand;
 export type Command = ChatCommand | ContextMenuCommand;
 
-const commands = { scoreboard, score, guess, check };
+const commands = { scoreboard, score, scores, guess, check };
 const devCommands = { test };
 
 export enum CommandScopes {
