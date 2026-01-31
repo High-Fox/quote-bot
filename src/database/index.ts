@@ -22,6 +22,7 @@ type RequiredAttributes<T extends Model> = Exclude<Exclude<keyof T, keyof Model>
 	[Key in keyof T as T[Key] extends Required<T>[Key] ? never : Key]: T[Key]
 }>;
 type ModelAttributes<T extends Model> = Pick<T, RequiredAttributes<Attributes<T>>>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type CreationAttributes<T extends Model> = T extends Model<infer A, infer B> ? B : never;
 
 export const hasScoreboard = (channelId: string) => {
