@@ -1,8 +1,17 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes } from "sequelize";
+import { DataTypes, InferAttributes, InferCreationAttributes, Sequelize } from "sequelize";
 import { BelongsTo, Column, Index, Model, PrimaryKey, Table, Validate } from "sequelize-typescript";
 import { Scoreboard } from "./Scoreboard";
 
 @Table({
+	scopes: {
+		ranked: {
+			attributes: {
+				include: [
+					[Sequelize.literal('((SELECT COUNT(*) FROM MemberScores AS compare WHERE compare.score > MemberScore.score) + 1)'), 'rank']
+				]
+			}
+		}
+	},
 	timestamps: false
 })
 export class MemberScore extends Model<InferAttributes<MemberScore>, InferCreationAttributes<MemberScore>> {
@@ -20,7 +29,7 @@ export class MemberScore extends Model<InferAttributes<MemberScore>, InferCreati
 	@Column({ type: DataTypes.NUMBER, allowNull: false, defaultValue: 0 })
 	declare score: number;
 
-	rank?: CreationOptional<number>;
+	declare rank?: number;
 
 	@BelongsTo(() => Scoreboard, 'channelId')
 	scoreboard?: Scoreboard;

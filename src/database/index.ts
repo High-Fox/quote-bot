@@ -42,11 +42,7 @@ export const createScoreboard = (options: ModelAttributes<Scoreboard>) => {
 
 export const getMemberScore = (scoreboard: Scoreboard, memberId: string) => {
 	return scoreboard.$get('memberScores', {
-		attributes: {
-			include: [
-				[Sequelize.literal('((SELECT COUNT(*) FROM MemberScores AS compareScore WHERE compareScore.score > MemberScore.score) + 1)'), 'rank']
-			]
-		},
+		scope: 'ranked',
 		where: {
 			memberId: memberId
 		},
