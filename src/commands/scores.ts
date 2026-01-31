@@ -13,7 +13,7 @@ export const scores: Command = {
 	type: ApplicationCommandType.ChatInput,
 	data: new SlashCommandBuilder()
 		.setName('scores')
-		.setDescription('View everyone\'s quote scores and rank within this channel.'),
+		.setDescription('Browse the full ranking of quote scores within this channel.'),
 	execute: async (interaction: ChatInputCommandInteraction) => {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		const replyMessage = await interaction.fetchReply();
@@ -24,8 +24,9 @@ export const scores: Command = {
 
 		let page = 0;
 		const pagedScores = await getPagedScores(scoreboard);
+		const pages = pagedScores.map((memberScores, index) => createComponents(pagedScores, index));
 		await interaction.editReply({
-			components: createComponents(pagedScores, page),
+			components: pages[page],
 			flags: MessageFlags.IsComponentsV2
 		});
 
@@ -35,10 +36,9 @@ export const scores: Command = {
 				(button.customId === SCORES_NEXT_PAGE || button.customId === SCORES_PREVIOUS_PAGE),
 			idle: 35_000
 		}).on('collect', async (componentInteraction) => {
-			await componentInteraction.deferUpdate();
 			page += componentInteraction.customId === SCORES_NEXT_PAGE ? 1 : -1;
 			await componentInteraction.update({
-				components: createComponents(pagedScores, page)
+				components: pages[page]
 			});
 		}).once('end', async () => {
 			await interaction.deleteReply();
@@ -47,12 +47,11 @@ export const scores: Command = {
 }
 
 const createComponents = (pagedScores: MemberScore[][], page: number) => {
-	const memberScores = pagedScores[page];
 	const container = containerBase()
+		.addTextDisplayComponents(textDisplay => textDisplay.setContent('## 🏆  Scores'))
 		.addSeparatorComponents(seperator => seperator.setDivider(false))
-		.addTextDisplayComponents(textDisplay => textDisplay.setContent('## 🏆 Scores'))
 		.addTextDisplayComponents(textDisplay => textDisplay.setContent(
-			memberScores
+			pagedScores[page]
 				.map(memberScore => memberScore.get())
 				.reduce((text, { memberId, score, rank }) => {
 					return text + `${rank}. ${userMention(memberId)} - **${score} Quotes**\n`;
@@ -82,13 +81,15 @@ const getPagedScores = (scoreboard: Scoreboard) => {
 			]
 		},
 		order: [['score', 'DESC']]
-	}).then(results => results.reduce((pages, score, index) => {
-		const pageIndex = Math.floor(index / SCORES_PER_PAGE);
+	}).then(results => {
+		return results.reduce((pages, score, index) => {
+			const pageIndex = Math.floor(index / SCORES_PER_PAGE);
+			if (!pages[pageIndex])
+				pages[pageIndex] = [];
 
-		if (!pages[pageIndex])
-			pages[pageIndex] = [];
-		pages[pageIndex].push(score);
+			pages[pageIndex].push(score);
 
-		return pages;
-	}, <MemberScore[][]>[]));
+			return pages;
+		}, <MemberScore[][]>[]);
+	});
 }
