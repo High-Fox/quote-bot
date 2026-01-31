@@ -21,15 +21,15 @@ await connection.sync()
 type RequiredAttributes<T extends Model> = Exclude<Exclude<keyof T, keyof Model>, keyof {
 	[Key in keyof T as T[Key] extends Required<T>[Key] ? never : Key]: T[Key]
 }>;
-type ModelAttributes<T extends Model, Options extends { omit?: keyof Attributes<T> } = { omit: never }> = 
-	Pick<T, Exclude<RequiredAttributes<Attributes<T>>, Options['omit']>>;
+type ModelAttributes<T extends Model> = Pick<T, RequiredAttributes<Attributes<T>>>;
+type CreationAttributes<T extends Model> = T extends Model<infer A, infer B> ? B : never;
 
 export const hasScoreboard = (channelId: string) => {
 	return Scoreboard.count({
 		where: {
 			channelId: channelId
 		}
-	}).then(count => count !== 0);
+	}).then(count => count > 0);
 }
 
 export const getScoreboard = (channelId: string) => {
@@ -54,7 +54,7 @@ export const incrementMemberScores = (scoreboard: Scoreboard, memberScores: Map<
 	return Promise.all([...memberScores.entries()].map(([memberId, amount]) => {
 		return getMemberScore(scoreboard, memberId)
 			.then(memberScore => {
-				return memberScore ? memberScore.increment('score', { by: amount }) : createMemberScore(scoreboard, { memberId, score: amount });
+				return memberScore?.increment('score', { by: amount }) ?? createMemberScore(scoreboard, { memberId, score: amount });
 			});
 	}));
 }
@@ -73,13 +73,13 @@ export const decrementMemberScores = (scoreboard: Scoreboard, memberScores: Map<
 	}));
 }
 
-export const createMemberScore = (scoreboard: Scoreboard, options: ModelAttributes<MemberScore, { omit: 'channelId' }>) => {
+export const createMemberScore = (scoreboard: Scoreboard, options: Omit<ModelAttributes<MemberScore>, 'channelId'>) => {
 	return scoreboard.$create<MemberScore>(MemberScore.name, options);
 }
 
 export const createMemberScores = (
 	scoreboard: Scoreboard,
-	optionsArray: ModelAttributes<MemberScore, { omit: 'channelId' }>[]
+	optionsArray: Omit<ModelAttributes<MemberScore>, 'channelId'>[]
 ) => {
 	return MemberScore.bulkCreate(optionsArray.map(options => ({
 		channelId: scoreboard.channelId,
@@ -91,23 +91,16 @@ export const getScoredMessage = (messageId: string) => {
 	return ScoredMessage.findByPk(messageId);
 }
 
-export const createScoredMessage = (
-	scoreboard: Scoreboard,
-	options: ModelAttributes<ScoredMessage, { omit: 'channelId' | 'quotees' }> & { quotees: string[] }
-) => {
+export const createScoredMessage = (scoreboard: Scoreboard, options: Omit<CreationAttributes<ScoredMessage>, 'channelId'>) => {
 	return scoreboard.$create<ScoredMessage>(ScoredMessage.name, options);
 }
 
 export const createScoredMessages = (
 	scoreboard: Scoreboard,
-	optionsArray: (ModelAttributes<ScoredMessage, { omit: 'channelId' | 'quotees' }> & { quotees: string[] })[]
+	optionsArray: Omit<CreationAttributes<ScoredMessage>, 'channelId'>[]
 ) => {
 	return ScoredMessage.bulkCreate(optionsArray.map(options => ({
 		channelId: scoreboard.channelId,
 		...options
 	})));
-}
-
-export const removeScoredMessage = (scoredMessage: ScoredMessage) => {
-	return scoredMessage.destroy();
 }

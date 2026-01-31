@@ -1,16 +1,17 @@
-import { DataTypes, InferAttributes, InferCreationAttributes } from "sequelize";
+import { DataTypes, InferAttributes } from "sequelize";
 import { BelongsTo, Column, Index, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { Scoreboard } from "./Scoreboard";
 
+type ScoredMessageCreationAttributes = {
+	messageId: string;
+	channelId: string;
+	quotees: string[];
+};
+
 @Table({
-	timestamps: false,
-	defaultScope: {
-		attributes: {
-			exclude: ['quoteesArray']
-		}
-	}
+	timestamps: false
 })
-export class ScoredMessage extends Model<InferAttributes<ScoredMessage, { omit: 'quoteesArray' }>, InferCreationAttributes<ScoredMessage, { omit: 'quoteesArray' | 'quotees' }> & { quotees: string[] }> {
+export class ScoredMessage extends Model<InferAttributes<ScoredMessage, { omit: 'quoteesArray' }>, ScoredMessageCreationAttributes> {
 	@Index
 	@PrimaryKey
 	@Column(DataTypes.STRING)

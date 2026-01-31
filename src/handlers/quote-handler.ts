@@ -51,7 +51,7 @@ subscribe('on', Events.MessageUpdate, async (oldMessage, message) => {
 
 	if (previousMessageScore) {
 		if (!newQuotees.length)
-			db.removeScoredMessage(previousMessageScore);
+			previousMessageScore.destroy();
 		else {
 			previousMessageScore.quotees = newQuotees;
 			previousMessageScore.save();
@@ -73,7 +73,7 @@ subscribe('on', Events.MessageDelete, async (message) => {
 	const oldQuotees = frequencyScore(previousScore.quoteesArray);
 	await Promise.all([
 		db.decrementMemberScores(scoreboard, oldQuotees),
-		db.removeScoredMessage(previousScore)
+		previousScore.destroy()
 	]);
 	updateScoreboard(message.channelId, message.channel.messages);
 });
