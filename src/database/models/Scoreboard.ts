@@ -1,7 +1,7 @@
-import { DataTypes, InferAttributes, InferCreationAttributes } from "sequelize";
-import { Column, HasMany, Index, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { MemberScore } from "./MemberScore";
-import { ScoredMessage } from "./ScoredMessage";
+import { DataTypes, InferAttributes, InferCreationAttributes } from 'sequelize';
+import { Column, HasMany, Index, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { MemberScore } from './MemberScore';
+import { ScoredMessage } from './ScoredMessage';
 
 @Table({
 	timestamps: false

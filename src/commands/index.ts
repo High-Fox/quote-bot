@@ -17,7 +17,7 @@ export interface BasicCommand extends SerializableCommand<SlashCommandOptionsOnl
 };
 export interface SubcommandsCommand extends SerializableCommand<SlashCommandSubcommandsOnlyBuilder> {
 	type: ApplicationCommandType.ChatInput,
-	execute: { [subcommand: string]: CommandFunction<ChatInputCommandInteraction<'raw' | 'cached'>> }
+	execute: Record<string, CommandFunction<ChatInputCommandInteraction<'raw' | 'cached'>>>
 };
 export interface MessageContextMenuCommand extends SerializableCommand<ContextMenuCommandBuilder> {
 	type: ApplicationCommandType.Message,

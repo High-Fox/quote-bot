@@ -1,8 +1,8 @@
-import { DataTypes, InferAttributes } from "sequelize";
-import { BelongsTo, Column, Index, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { Scoreboard } from "./Scoreboard";
+import { DataTypes, InferAttributes } from 'sequelize';
+import { BelongsTo, Column, Index, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { Scoreboard } from './Scoreboard';
 
-type ScoredMessageCreationAttributes = {
+interface ScoredMessageCreationAttributes {
 	messageId: string;
 	channelId: string;
 	quotees: string[];

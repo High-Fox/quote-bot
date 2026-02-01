@@ -1,7 +1,7 @@
-import { ApplicationCommandType, ChatInputCommandInteraction, ComponentType, GuildMessageManager, MessageFlags, SlashCommandBuilder, userMention, UserSelectMenuBuilder } from "discord.js";
-import { QuoteTuple, resolveQuoteTuples } from "../handlers/quote-handler";
-import { Command } from ".";
-import { containerBase } from "../utils";
+import { ApplicationCommandType, ChatInputCommandInteraction, ComponentType, GuildMessageManager, MessageFlags, SlashCommandBuilder, userMention, UserSelectMenuBuilder } from 'discord.js';
+import { QuoteTuple, resolveQuoteTuples } from '../handlers/quote-handler';
+import { Command } from '.';
+import { containerBase } from '../utils';
 import { Scoreboard } from '../database/models/';
 import * as db from '../database';
 

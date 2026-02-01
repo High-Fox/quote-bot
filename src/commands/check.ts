@@ -1,6 +1,6 @@
-import { ApplicationCommandType, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, MessageFlags, userMention } from "discord.js";
-import { Command } from ".";
-import { resolveQuoteTuples } from "../handlers/quote-handler";
+import { ApplicationCommandType, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, MessageFlags, userMention } from 'discord.js';
+import { Command } from '.';
+import { resolveQuoteTuples } from '../handlers/quote-handler';
 
 export const check: Command = {
 	type: ApplicationCommandType.Message,

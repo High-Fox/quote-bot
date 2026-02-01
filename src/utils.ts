@@ -125,7 +125,7 @@ export class StringNavigator {
 	moveIf(input: string | RegExp): boolean {
 		if (input instanceof RegExp) {
 			const match = this.peek().match(input);
-			if (match && this.peek().indexOf(match[0]) === 0) {
+			if (match && this.peek().startsWith(match[0])) {
 				this.move(match[0].length);
 				return true;
 			}

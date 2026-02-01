@@ -6,15 +6,17 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
 	eslint.configs.recommended,
-	...tseslint.configs.recommended,
+	tseslint.configs.stylisticTypeChecked,
 	{
 		languageOptions: {
 			parserOptions: {
 				tsconfigRootDir: import.meta.dirname,
+				projectService: true
 			},
 		},
 		rules: {
 			curly: ['error', 'multi-or-nest'],
+			quotes: ['error', 'single'],
 			indent: [
 				'error', 'tab',
 				{
@@ -31,6 +33,10 @@ export default defineConfig(
 			'no-unused-private-class-members': 'warn',
 			'@typescript-eslint/no-unused-vars': 'warn'
 		}
+	},
+	{
+		files: ['**/*.js', '**/*.mjs'],
+		extends: [tseslint.configs.disableTypeChecked],
 	},
 	{
 		ignores: ['dist/']

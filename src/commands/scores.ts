@@ -1,7 +1,7 @@
-import { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, MessageFlags, SlashCommandBuilder, userMention } from "discord.js";
-import { Command } from ".";
-import { MemberScore, Scoreboard } from "../database/models";
-import { containerBase } from "../utils";
+import { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, MessageFlags, SlashCommandBuilder, userMention } from 'discord.js';
+import { Command } from '.';
+import { MemberScore, Scoreboard } from '../database/models';
+import { containerBase } from '../utils';
 import * as db from '../database'
 
 const SCORES_NEXT_PAGE = 'scoresNextPage';
@@ -89,6 +89,6 @@ const getPagedScores = (scoreboard: Scoreboard) => {
 
 			currentScore = score.score;
 			return pages;
-		}, <MemberScore[][][]>[]);
+		}, [] as MemberScore[][][]);
 	});
 }

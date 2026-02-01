@@ -1,6 +1,6 @@
-import { DataTypes, InferAttributes, InferCreationAttributes, Sequelize } from "sequelize";
-import { BelongsTo, Column, Index, Model, PrimaryKey, Table, Validate } from "sequelize-typescript";
-import { Scoreboard } from "./Scoreboard";
+import { DataTypes, InferAttributes, InferCreationAttributes, Sequelize } from 'sequelize';
+import { BelongsTo, Column, Index, Model, PrimaryKey, Table, Validate } from 'sequelize-typescript';
+import { Scoreboard } from './Scoreboard';
 
 @Table({
 	scopes: {

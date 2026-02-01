@@ -175,10 +175,10 @@ export const extractQuotees = (text: string): string[] => {
  */
 export const resolveMemberId = async (text: string, guildMembers?: GuildMemberManager, sender?: string) => {
 	text = text.trim();
-	const mentionMatch = text.match(MENTION_ID);
+	const mentionMatch = MENTION_ID.exec(text);
 	if (mentionMatch)
 		return mentionMatch[0];
-	const nameMatch = text.match(/\w+/);
+	const nameMatch = /\w+/.exec(text);
 
 	if (nameMatch) {
 		if (sender && nameMatch[0].trim().toLowerCase() === 'me')
