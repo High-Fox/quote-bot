@@ -1,10 +1,11 @@
-import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MediaGalleryBuilder, MessageFlags, SlashCommandBuilder, TextDisplayBuilder, User } from 'discord.js';
+import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MediaGalleryBuilder, MessageFlags, SlashCommandBuilder, TextDisplayBuilder, User, userMention } from 'discord.js';
 import { Command } from '.';
 import { containerBase, ordinalSuffix } from '../utils';
 import { subscribe } from '../handlers/event-handler';
-import { Scoreboard } from '../database/models/';
+import { MemberScore, Scoreboard } from '../database/models/';
 import { SCORE_USER_SELECT } from '../handlers/scoreboard-handler';
 import * as db from '../database';
+import { Op } from 'sequelize';
 
 export const score: Command = {
 	type: ApplicationCommandType.ChatInput,
@@ -52,15 +53,17 @@ subscribe('on', Events.InteractionCreate, async (interaction) => {
 });
 
 const createComponents = async (scoreboard: Scoreboard, user: User) => {
-	const memberScore = await db.getMemberScore(scoreboard, user.id)
-		.then(instance => instance ? instance.get() : null);
-	
+	const memberScore = await db.getMemberScore(scoreboard, user.id);
 	if (!memberScore)
 		return [new MediaGalleryBuilder().addItems(galleryItem => galleryItem.setURL('https://en.meming.world/images/en/0/03/I%27ve_Never_Met_This_Man_In_My_Life.jpg'))];
 
 	let text = `**${user.displayName}** has **${memberScore.score} quotes** in ${channelMention(scoreboard.channelId)}`;
-	if (memberScore.rank)
-		text += `\n\nThey are ranked ${ordinalSuffix(memberScore.rank)}!`;
+	const rank = memberScore.get('rank');
+	if (rank) {
+		const tiedWith = await getTiedWith(scoreboard, memberScore);
+		text += !tiedWith.length ? `\n\nThey are ranked ${ordinalSuffix(rank)}!`
+			: `\n\nThey are tied for ${ordinalSuffix(rank)} with ${tiedWith.map(userMention).join(', ')}.`;
+	}
 
 	const container = containerBase();
 	const textDisplay = new TextDisplayBuilder().setContent(text);
@@ -73,4 +76,16 @@ const createComponents = async (scoreboard: Scoreboard, user: User) => {
 		container.addTextDisplayComponents(textDisplay);
 
 	return [container];
+}
+
+const getTiedWith = (scoreboard: Scoreboard, memberScore: MemberScore) => {
+	return scoreboard.$get('memberScores', {
+		attributes: ['memberId'],
+		where: {
+			score: memberScore.score,
+			memberId: {
+				[Op.not]: memberScore.memberId
+			}
+		}
+	}).then(results => results.map(instance => instance.memberId));
 }
