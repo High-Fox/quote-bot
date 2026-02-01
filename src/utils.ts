@@ -167,13 +167,14 @@ export class StringNavigator {
 	}
 
 	/**
-	 * Reverts the last forward move operation, restoring the cursor to its previous position.
+	 * Reverts the last forward move operation, restoring the cursor to its previous position
+	 * and returning the string previously consumed by said forward move operation.
 	 */
-	back(): this {
+	back(): string {
 		const lastMove = this.history.pop();
 		if (lastMove)
 			this.cursorPos -= lastMove.length;
-		return this;
+		return lastMove ?? '';
 	}
 
 	/**

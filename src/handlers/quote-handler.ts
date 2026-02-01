@@ -6,8 +6,8 @@ import * as db from '../database';
 
 const logger = getLogger('quote-handler');
 const MENTION_ID = /(?<=<@)\d{17,19}(?=>)/;
-const MENTION_OR_ME = /<@\d{17,19}>|(?<!\*)\bMe\b/i;
-const UNTIL_MENTION_OR_ME = new RegExp('[-,\\s]+(?=' + MENTION_OR_ME.source + ')', 'i');
+const MENTION_OR_ME = /<@\d{17,19}>|(?<!\*)\bMe\b/is;
+const UNTIL_MENTION_OR_ME = new RegExp('(?:[-,]|[^\\S\\r\\n])+(?=' + MENTION_OR_ME.source + ')', 'i');
 const QUOTES = /["“”].+?["“”]/gs;
 // Tuple consisting of a quote and quotee user IDs
 export type QuoteTuple = [string, string[]];
@@ -148,10 +148,9 @@ const resolveQuotees = async ({ content, guild, author }: Message<true>): Promis
  * @returns An array of quotee names (allowing duplicates).
  */
 export const extractQuotees = (text: string): string[] => {
-	const inlinedText = collapseText(text);
 	const quotees: string[] = [];
 
-	for (const context of splitAtQuotes(inlinedText)) {
+	for (const context of splitAtQuotes(text)) {
 		const navigator = new StringNavigator(context);
 
 		navigator.moveIf(QUOTES);
