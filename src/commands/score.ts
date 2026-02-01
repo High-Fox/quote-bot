@@ -57,7 +57,7 @@ const createComponents = async (scoreboard: Scoreboard, user: User) => {
 	if (!memberScore)
 		return [new MediaGalleryBuilder().addItems(galleryItem => galleryItem.setURL('https://en.meming.world/images/en/0/03/I%27ve_Never_Met_This_Man_In_My_Life.jpg'))];
 
-	let text = `**${user.displayName}** has **${memberScore.score} quotes** in ${channelMention(scoreboard.channelId)}`;
+	let text = `**${user}** has **${memberScore.score} quotes** in ${channelMention(scoreboard.channelId)}`;
 	const rank = memberScore.get('rank');
 	if (rank) {
 		const tiedWith = await getTiedWith(scoreboard, memberScore);
@@ -65,15 +65,11 @@ const createComponents = async (scoreboard: Scoreboard, user: User) => {
 			: `\n\nThey are tied for ${ordinalSuffix(rank)} with ${tiedWith.map(userMention).join(', ')}.`;
 	}
 
-	const container = containerBase();
-	const textDisplay = new TextDisplayBuilder().setContent(text);
-	if (user.avatarURL()) {
-		container.addSectionComponents(section => {
-			section.setThumbnailAccessory(thumbnail => thumbnail.setURL(user.avatarURL()!));
-			return section.addTextDisplayComponents(textDisplay);
+	const container = containerBase()
+		.addSectionComponents(section => {
+			section.setThumbnailAccessory(thumbnail => thumbnail.setURL(user.displayAvatarURL()));
+			return section.addTextDisplayComponents(textDisplay => textDisplay.setContent(text));
 		});
-	} else
-		container.addTextDisplayComponents(textDisplay);
 
 	return [container];
 }
