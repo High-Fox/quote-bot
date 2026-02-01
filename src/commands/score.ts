@@ -1,4 +1,4 @@
-import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MediaGalleryBuilder, MessageFlags, SlashCommandBuilder, User } from 'discord.js';
+import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MediaGalleryBuilder, MessageFlags, SlashCommandBuilder, TextDisplayBuilder, User } from 'discord.js';
 import { Command } from '.';
 import { containerBase, ordinalSuffix } from '../utils';
 import { subscribe } from '../handlers/event-handler';
@@ -54,20 +54,23 @@ subscribe('on', Events.InteractionCreate, async (interaction) => {
 const createComponents = async (scoreboard: Scoreboard, user: User) => {
 	const memberScore = await db.getMemberScore(scoreboard, user.id)
 		.then(instance => instance ? instance.get() : null);
+	
 	if (!memberScore)
 		return [new MediaGalleryBuilder().addItems(galleryItem => galleryItem.setURL('https://en.meming.world/images/en/0/03/I%27ve_Never_Met_This_Man_In_My_Life.jpg'))];
+
 	let text = `**${user.displayName}** has **${memberScore.score} quotes** in ${channelMention(scoreboard.channelId)}`;
 	if (memberScore.rank)
 		text += `\n\nThey are ranked ${ordinalSuffix(memberScore.rank)}!`;
 
-	const container = containerBase()
-		.addSectionComponents(section => {
-			const avatar = user.avatarURL();
-			if (avatar)
-				section.setThumbnailAccessory(thumbnail => thumbnail.setURL(avatar));
-			return section
-				.addTextDisplayComponents(textDisplay => textDisplay.setContent(text));
+	const container = containerBase();
+	const textDisplay = new TextDisplayBuilder().setContent(text);
+	if (user.avatarURL()) {
+		container.addSectionComponents(section => {
+			section.setThumbnailAccessory(thumbnail => thumbnail.setURL(user.avatarURL()!));
+			return section.addTextDisplayComponents(textDisplay);
 		});
+	} else
+		container.addTextDisplayComponents(textDisplay);
 
 	return [container];
 }
