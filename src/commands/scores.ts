@@ -50,10 +50,9 @@ const createComponents = (pagedScores: MemberScore[][], page: number) => {
 		.addTextDisplayComponents(textDisplay => textDisplay.setContent('## 🏆  Scores'))
 		.addSeparatorComponents(seperator => seperator)
 		.addTextDisplayComponents(textDisplay => textDisplay.setContent(
-			pagedScores[page]
-				.reduce((text, { memberId, score }, index) => {
-					return text + `${page * SCORES_PER_PAGE + index + 1}. ${userMention(memberId)} - **${score} Quotes**\n`;
-				}, '')
+			pagedScores[page].reduce((text, { memberId, score }, index) => {
+				return text + `${page * SCORES_PER_PAGE + index + 1}. ${userMention(memberId)} - **${score} Quotes**\n`;
+			}, '')
 		));
 	const actionRow = new ActionRowBuilder<ButtonBuilder>()
 		.addComponents(

@@ -27,6 +27,8 @@ export const scoreboard: Command = {
 				return interaction.reply({ content: 'A scoreboard already exists in this channel.', flags: MessageFlags.Ephemeral });
 			if (!interaction.channel)
 				throw new Error('Channel not present in interaction object.');
+			if (!interaction.channel.viewable)
+				return interaction.reply({ content: 'I don\'t have permission to view this channel.', flags: MessageFlags.Ephemeral });
 			
 			await interaction.deferReply();
 			const replyMessage = await interaction.fetchReply();
