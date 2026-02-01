@@ -7,7 +7,7 @@ import { Scoreboard } from "./Scoreboard";
 		ranked: {
 			attributes: {
 				include: [
-					[Sequelize.literal('((SELECT COUNT(*) FROM MemberScores AS compare WHERE compare.score > MemberScore.score) + 1)'), 'rank']
+					[Sequelize.literal('((SELECT COUNT(*) FROM MemberScores AS compare WHERE compare.channelId = MemberScore.channelId AND compare.score > MemberScore.score) + 1)'), 'rank']
 				]
 			}
 		}
@@ -29,7 +29,7 @@ export class MemberScore extends Model<InferAttributes<MemberScore>, InferCreati
 	@Column({ type: DataTypes.NUMBER, allowNull: false, defaultValue: 0 })
 	declare score: number;
 
-	declare rank?: number;
+	rank?: number;
 
 	@BelongsTo(() => Scoreboard, 'channelId')
 	scoreboard?: Scoreboard;

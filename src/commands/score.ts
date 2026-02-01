@@ -1,11 +1,11 @@
-import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MediaGalleryBuilder, MessageFlags, SlashCommandBuilder, TextDisplayBuilder, User, userMention } from 'discord.js';
+import { ApplicationCommandType, channelMention, ChatInputCommandInteraction, Events, MediaGalleryBuilder, MessageFlags, SlashCommandBuilder, User, userMention } from 'discord.js';
+import { Op } from 'sequelize';
 import { Command } from '.';
 import { containerBase, ordinalSuffix } from '../utils';
 import { subscribe } from '../handlers/event-handler';
 import { MemberScore, Scoreboard } from '../database/models/';
 import { SCORE_USER_SELECT } from '../handlers/scoreboard-handler';
 import * as db from '../database';
-import { Op } from 'sequelize';
 
 export const score: Command = {
 	type: ApplicationCommandType.ChatInput,
