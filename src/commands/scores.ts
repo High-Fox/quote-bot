@@ -45,13 +45,13 @@ export const scores: Command = {
 	}
 }
 
-const createComponents = (pagedScores: MemberScore[][], page: number) => {
+const createComponents = (pagedScores: MemberScore[][][], page: number) => {
 	const container = containerBase()
 		.addTextDisplayComponents(textDisplay => textDisplay.setContent('## 🏆  Scores'))
 		.addSeparatorComponents(seperator => seperator)
 		.addTextDisplayComponents(textDisplay => textDisplay.setContent(
-			pagedScores[page].reduce((text, { memberId, score }, index) => {
-				return text + `${page * SCORES_PER_PAGE + index + 1}. ${userMention(memberId)} - **${score} Quotes**\n`;
+			pagedScores[page].reduce((text, memberScores, index) => {
+				return text + `${page * SCORES_PER_PAGE + index + 1}. ${memberScores.map(memberScore => userMention(memberScore.memberId)).join(', ')} - **${memberScores[0].score} Quotes**\n`;
 			}, '')
 		));
 	const actionRow = new ActionRowBuilder<ButtonBuilder>()
@@ -74,14 +74,21 @@ const getPagedScores = (scoreboard: Scoreboard) => {
 	return scoreboard.$get('memberScores', {
 		order: [['score', 'DESC']]
 	}).then(results => {
-		return results.reduce((pages, score, index) => {
+		let index = 0;
+		let currentScore = 0;
+		return results.reduce((pages, score) => {
 			const pageIndex = Math.floor(index / SCORES_PER_PAGE);
-			if (!pages[pageIndex])
-				pages[pageIndex] = [];
+			const page = pages[pageIndex] ??= [];
 
-			pages[pageIndex].push(score);
+			if (score.score === currentScore && page.length)
+				page[page.length - 1].push(score);
+			else {
+				page.push([score]);
+				index++;
+			}
 
+			currentScore = score.score;
 			return pages;
-		}, <MemberScore[][]>[]);
+		}, <MemberScore[][][]>[]);
 	});
 }
