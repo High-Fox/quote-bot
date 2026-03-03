@@ -2,6 +2,7 @@ import { GuildTextBasedChannel, Message, GuildMemberManager, Events, Collection 
 import { getChannelMessages, collapseText, StringNavigator, getLogger, frequencyScore } from '../utils';
 import { subscribe } from './event-handler';
 import { removeScoreboard, updateScoreboard } from './scoreboard-handler';
+import { Scoreboard } from '../database/models';
 import * as db from '../database';
 
 const logger = getLogger('quote-handler');
@@ -18,14 +19,8 @@ subscribe('on', Events.MessageCreate, async (message) => {
 	const scoreboard = await db.getScoreboard(message.channelId);
 	if (!scoreboard || !message.inGuild() || message.author.bot)
 		return;
-	const quotees = await resolveQuotees(message);
-	if (!quotees.length)
-		return;
-
-	await Promise.all([
-		db.createScoredMessage(scoreboard, { messageId: message.id, quotees }),
-		db.incrementMemberScores(scoreboard, frequencyScore(quotees))
-	]);
+	
+	await newMessage(scoreboard, message);
 	updateScoreboard(message.channelId, message.channel.messages);
 });
 
@@ -35,30 +30,8 @@ subscribe('on', Events.MessageUpdate, async (oldMessage, message) => {
 	const scoreboard = await db.getScoreboard(message.channelId);
 	if (!scoreboard || !message.inGuild() || message.author.bot)
 		return;
-	const previousMessageScore = await db.getScoredMessage(message.id);
-
-	const oldQuotees = previousMessageScore ? previousMessageScore.quoteesArray : [];
-	const oldQuoteesMap = frequencyScore(oldQuotees);
-	const newQuotees = await resolveQuotees(message);
-	const newQuoteesMap = frequencyScore(newQuotees);
-	if (oldQuoteesMap.size === newQuoteesMap.size) {
-		if (!oldQuoteesMap.size || [...newQuoteesMap.entries()].every(([key, value]) => oldQuoteesMap.has(key) && oldQuoteesMap.get(key) === value))
-			return;
-	}
-
-	await db.decrementMemberScores(scoreboard, oldQuoteesMap);
-	await db.incrementMemberScores(scoreboard, newQuoteesMap);
-
-	if (previousMessageScore) {
-		if (!newQuotees.length)
-			previousMessageScore.destroy();
-		else {
-			previousMessageScore.quotees = newQuotees;
-			previousMessageScore.save();
-		}
-	} else
-		db.createScoredMessage(scoreboard, { messageId: message.id, quotees: newQuotees });
 	
+	await updateMessage(scoreboard, message);
 	updateScoreboard(message.channelId, message.channel.messages);
 });
 
@@ -84,6 +57,43 @@ subscribe('on', Events.ChannelDelete, async (channel) => {
 		return;
 	removeScoreboard(scoreboard);
 });
+
+export const newMessage = async (scoreboard: Scoreboard, message: Message<true>) => {
+	const quotees = await resolveQuotees(message);
+	if (!quotees.length)
+		return;
+
+	await Promise.all([
+		db.createScoredMessage(scoreboard, { messageId: message.id, quotees }),
+		db.incrementMemberScores(scoreboard, frequencyScore(quotees))
+	]);
+}
+
+export const updateMessage = async (scoreboard: Scoreboard, message: Message<true>) => {
+	const previousMessageScore = await db.getScoredMessage(message.id);
+
+	const oldQuotees = previousMessageScore ? previousMessageScore.quoteesArray : [];
+	const oldQuoteesMap = frequencyScore(oldQuotees);
+	const newQuotees = await resolveQuotees(message);
+	const newQuoteesMap = frequencyScore(newQuotees);
+	if (oldQuoteesMap.size === newQuoteesMap.size) {
+		if (!oldQuoteesMap.size || [...newQuoteesMap.entries()].every(([key, value]) => oldQuoteesMap.has(key) && oldQuoteesMap.get(key) === value))
+			return;
+	}
+
+	await db.decrementMemberScores(scoreboard, oldQuoteesMap);
+	await db.incrementMemberScores(scoreboard, newQuoteesMap);
+
+	if (previousMessageScore) {
+		if (!newQuotees.length)
+			previousMessageScore.destroy();
+		else {
+			previousMessageScore.quotees = newQuotees;
+			previousMessageScore.save();
+		}
+	} else
+		db.createScoredMessage(scoreboard, { messageId: message.id, quotees: newQuotees });
+}
 
 /**
  * Convenience method calling {@link resolveQuotees} on every message in a guild channel.

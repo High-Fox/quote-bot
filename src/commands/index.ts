@@ -1,10 +1,11 @@
 import { ApplicationCommandType, ChatInputCommandInteraction, CommandInteraction, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, RESTPostAPIBaseApplicationCommandsJSONBody, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandsOnlyBuilder, UserContextMenuCommandInteraction } from 'discord.js';
 import { scoreboard } from './scoreboard';
-import { test } from './dev/test';
 import { score } from './score';
 import { scores } from './scores';
 import { guess } from './guess';
 import { check } from './check';
+import { test } from './dev/test';
+import { update } from './dev/update';
 
 type CommandFunction<T extends CommandInteraction<'raw' | 'cached'>> = (interaction: T) => Promise<unknown>;
 interface SerializableCommand<Data extends { toJSON(): RESTPostAPIBaseApplicationCommandsJSONBody }> {
@@ -33,7 +34,7 @@ export type ContextMenuCommand = MessageContextMenuCommand | UserContextMenuComm
 export type Command = ChatCommand | ContextMenuCommand;
 
 const commands = { scoreboard, score, scores, guess, check };
-const devCommands = { test };
+const devCommands = { test, update };
 
 export enum CommandScopes {
 	USER = 'USER',

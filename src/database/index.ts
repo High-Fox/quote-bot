@@ -30,7 +30,7 @@ export const hasScoreboard = (channelId: string) => {
 		where: {
 			channelId: channelId
 		}
-	}).then(count => count > 0);
+	}).then(count => count === 1);
 }
 
 export const getScoreboard = (channelId: string) => {
@@ -86,6 +86,14 @@ export const createMemberScores = (
 		channelId: scoreboard.channelId,
 		...options
 	})));
+}
+
+export const hasScoredMessage = (messageId: string) => {
+	return ScoredMessage.count({
+		where: {
+			messageId: messageId
+		}
+	}).then(count => count === 1);
 }
 
 export const getScoredMessage = (messageId: string) => {
