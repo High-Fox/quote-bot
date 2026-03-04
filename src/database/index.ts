@@ -1,5 +1,5 @@
-import { Attributes } from 'sequelize';
-import { Model, Sequelize } from 'sequelize-typescript';
+import { CreationAttributes } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 import { getLogger } from '../utils';
 import { Scoreboard, MemberScore, ScoredMessage } from './models/';
 
@@ -18,13 +18,6 @@ await connection.sync()
 	.then(() => logger.complete('Database synced!'))
 	.catch(logger.error);
 
-type RequiredAttributes<T extends Model> = Exclude<Exclude<keyof T, keyof Model>, keyof {
-	[Key in keyof T as T[Key] extends Required<T>[Key] ? never : Key]: T[Key]
-}>;
-type ModelAttributes<T extends Model> = Pick<T, RequiredAttributes<Attributes<T>>>;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type CreationAttributes<T extends Model> = T extends Model<infer A, infer B> ? B : never;
-
 export const hasScoreboard = (channelId: string) => {
 	return Scoreboard.count({
 		where: {
@@ -37,7 +30,7 @@ export const getScoreboard = (channelId: string) => {
 	return Scoreboard.findByPk(channelId);
 }
 
-export const createScoreboard = (options: ModelAttributes<Scoreboard>) => {
+export const createScoreboard = (options: CreationAttributes<Scoreboard>) => {
 	return Scoreboard.create(options);
 }
 
@@ -74,13 +67,13 @@ export const decrementMemberScores = (scoreboard: Scoreboard, memberScores: Map<
 	}));
 }
 
-export const createMemberScore = (scoreboard: Scoreboard, options: Omit<ModelAttributes<MemberScore>, 'channelId'>) => {
+export const createMemberScore = (scoreboard: Scoreboard, options: Omit<CreationAttributes<MemberScore>, 'channelId'>) => {
 	return scoreboard.$create<MemberScore>(MemberScore.name, options);
 }
 
 export const createMemberScores = (
 	scoreboard: Scoreboard,
-	optionsArray: Omit<ModelAttributes<MemberScore>, 'channelId'>[]
+	optionsArray: Omit<CreationAttributes<MemberScore>, 'channelId'>[]
 ) => {
 	return MemberScore.bulkCreate(optionsArray.map(options => ({
 		channelId: scoreboard.channelId,
