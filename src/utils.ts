@@ -1,4 +1,4 @@
-import { Collection, Colors, ContainerBuilder, GuildTextBasedChannel, Message, TextBasedChannel } from 'discord.js'
+import { Collection, Colors, ContainerBuilder, GuildTextBasedChannel, Message, TextBasedChannel } from 'discord.js';
 import signale from 'signale';
 
 const _defaultSignaleOptions: signale.SignaleOptions = {
@@ -79,7 +79,7 @@ export const getChannelMessages = async <
 		// is 100 messages too big of a processing chunk? fafo i guess
 		await channel.messages.fetch({ limit: 100, before: messagesPointer.id })
 			.then(messages => {
-				messagesPointer = messages.size > 0 ? messages.at(-1) : null;
+				messagesPointer = messages.at(-1);
 				for (const [id, message] of messages)
 					channelMessages.set(id, message as Message<InGuild>);
 			})

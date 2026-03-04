@@ -14,8 +14,10 @@ export const client = new Client({
 			state: '...Always watching...'
 		}]
 	},
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent],
+	intents: [
+		GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent
+	],
 	partials: [Partials.Message]
 });
 

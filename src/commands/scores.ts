@@ -2,7 +2,7 @@ import { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, C
 import { Command } from '.';
 import { MemberScore, Scoreboard } from '../database/models';
 import { containerBase } from '../utils';
-import * as db from '../database'
+import * as db from '../database';
 
 const SCORES_NEXT_PAGE = 'scoresNextPage';
 const SCORES_PREVIOUS_PAGE = 'scoresPrevPage';

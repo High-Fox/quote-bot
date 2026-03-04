@@ -14,7 +14,7 @@ export const test: Command = {
 			return interaction.editReply('Test completed.');
 		} catch (error) {
 			logger.error(error);
-			await interaction.editReply('Error doing the test.');
+			return interaction.editReply('Error doing the test.');
 		}
 	}
 }

@@ -9,8 +9,7 @@ const eventHandlers: {
 } = {};
 
 export const subscribe = <Event extends keyof ClientEvents>(type: ListenerType, event: Event, listener: EventListener<Event>) => {
-	if (!eventHandlers[event])
-		eventHandlers[event] = {};
+	eventHandlers[event] ??= {};
 	eventHandlers[event][type] ??= [];
 	eventHandlers[event][type].push(listener);
 }

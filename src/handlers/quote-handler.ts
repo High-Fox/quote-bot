@@ -48,6 +48,7 @@ subscribe('on', Events.MessageDelete, async (message) => {
 		db.decrementMemberScores(scoreboard, oldQuotees),
 		previousScore.destroy()
 	]);
+
 	updateScoreboard(message.channelId, message.channel.messages);
 });
 
@@ -55,6 +56,7 @@ subscribe('on', Events.ChannelDelete, async (channel) => {
 	const scoreboard = await db.getScoreboard(channel.id);
 	if (!scoreboard)
 		return;
+
 	removeScoreboard(scoreboard);
 });
 
@@ -112,6 +114,7 @@ export const getAllQuotees = async (channel: GuildTextBasedChannel): Promise<Col
 					quotees.set(id, results);
 			});
 	}));
+
 	return quotees;
 }
 
@@ -176,6 +179,7 @@ export const extractQuotees = (text: string): string[] => {
 			}
 		}
 	}
+
 	return quotees;
 }
 
@@ -203,5 +207,6 @@ export const resolveMemberId = async (text: string, guildMembers?: GuildMemberMa
 				});
 		}
 	}
+	
 	return null;
 }

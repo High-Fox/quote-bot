@@ -15,7 +15,8 @@ export const score: Command = {
 		.addUserOption(option =>
 			option
 				.setName('user')
-				.setDescription('The user to get the score of. Leave blank to get your own score.')),
+				.setDescription('The user to get the score of. Leave blank to get your own score.')
+		),
 	execute: async (interaction: ChatInputCommandInteraction) => {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
