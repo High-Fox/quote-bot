@@ -1,22 +1,16 @@
 // @ts-check
 
 import eslint from '@eslint/js';
-import { defineConfig, globalIgnores } from 'eslint/config';
+import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-	globalIgnores(['dist/']),
 	{
-		extends: [eslint.configs.recommended],
-
-		rules: {
-			curly: ['error', 'multi-or-nest'],
-			quotes: ['error', 'single']
-		}
-	},
-	{
-		files: ['**/*.ts'],
-		extends: [tseslint.configs.stylisticTypeChecked],
+		files: ['src/**/*.ts'],
+		extends: [
+			eslint.configs.recommended,
+			tseslint.configs.stylisticTypeChecked
+		],
 
 		languageOptions: {
 			parserOptions: {
@@ -25,6 +19,8 @@ export default defineConfig(
 			},
 		},
 		rules: {
+			curly: ['error', 'multi-or-nest'],
+			quotes: ['error', 'single'],
 			indent: [
 				'error', 'tab',
 				{
