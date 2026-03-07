@@ -1,9 +1,8 @@
-import { ApplicationCommandType, ChatInputCommandInteraction, ContextMenuCommandInteraction, Events, InteractionContextType, REST, Routes } from 'discord.js';
-import { typeFlag } from 'type-flag';
+import { ApplicationCommandType, ChatInputCommandInteraction, ContextMenuCommandInteraction, InteractionContextType, REST, Routes } from 'discord.js';
 import { config } from '../config';
 import { ChatCommand, Commands, CommandScopes, CommandScope, SubcommandsCommand, CommandSet } from '../commands';
 import { getLogger } from '../utils';
-import { subscribe } from './event-handler';
+import { registerCLICommand } from './cli-handler';
 
 const logger = getLogger('command-handler');
 const rest = new REST({ version: '10' }).setToken(config.DISCORD_TOKEN);
@@ -22,20 +21,15 @@ const hasSubcommands = (command: ChatCommand): command is SubcommandsCommand => 
 	return typeof command.execute !== 'function';
 }
 
-subscribe('once', Events.ClientReady, async () => {
-	const deployScopes = ['dev', 'global'] as const;
-	const { flags } = typeFlag({
-		deployCommands: [(scope: typeof deployScopes[number]) => {
-			if (!deployScopes.includes(scope))
-				throw new Error(`Invalid value for deployCommands flag: '${scope}'`);
-			return scope;
-		}]
-	});
+registerCLICommand(['deploy'], 'Deploy slash commands.', (scope: string) => {
+	scope = scope.toLowerCase();
+	if (!['dev', 'global'].includes(scope))
+		return logger.error('Scope must be one of \'global\' or \'dev\'');
 	
-	if (flags.deployCommands.includes('dev'))
-		await deployToGuild({ guildId: config.DEV_GUILD_ID, scope: CommandScopes.DEV});
-	if (flags.deployCommands.includes('global'))
-		await deployGlobally();
+	if (scope === 'dev')
+		return deployToGuild({ guildId: config.DEV_GUILD_ID, scope: CommandScopes.DEV});
+	else
+		return deployGlobally();
 });
 
 export const handleChatCommand = async (interaction: ChatInputCommandInteraction<'raw' | 'cached'>) => {

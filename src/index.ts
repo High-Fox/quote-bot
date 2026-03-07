@@ -1,9 +1,10 @@
 import { Client, Events, GatewayIntentBits, MessageFlags, Partials } from 'discord.js';
 import { config } from './config';
 import { getLogger } from './utils';
-import { registerEventHandlers, subscribe } from './handlers/event-handler';
-import './database';
+import { registerEventListeners, subscribe } from './handlers/event-handler';
+import { registerCLICommand, startCLI } from './handlers/cli-handler';
 import { handleChatCommand, handleContextMenuCommand } from './handlers/command-handler';
+import './database';
 import './handlers/quote-handler';
 
 const logger = getLogger('main');
@@ -21,8 +22,15 @@ export const client = new Client({
 	partials: [Partials.Message]
 });
 
+registerCLICommand(['stop', 'exit'], 'Stops the process.', async function() {
+	this.close();
+	await client.destroy();
+	return process.exit();
+});
+
 subscribe('once', Events.ClientReady, async (readyClient) => {
 	logger.success('Logged in as %s', readyClient.user.tag);
+	startCLI();
 });
 
 subscribe('on', Events.InteractionCreate, async (interaction) => {

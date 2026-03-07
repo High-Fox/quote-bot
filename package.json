@@ -21,8 +21,7 @@
     "sequelize": "^6.37.7",
     "sequelize-typescript": "^2.1.6",
     "signale": "^1.4.0",
-    "sqlite3": "^5.1.7",
-    "type-flag": "^4.0.3"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
