@@ -4,24 +4,24 @@ import { getLogger } from '../utils';
 const logger = getLogger('event-handler');
 type EventListener<Event extends keyof ClientEvents> = (...args: ClientEvents[Event]) => void;
 type ListenerType = 'on' | 'once';
-const eventHandlers: {
+const eventListeners: {
 	[Event in keyof ClientEvents]?: Partial<Record<ListenerType, EventListener<Event>[]>>
 } = {};
 
 export const subscribe = <Event extends keyof ClientEvents>(type: ListenerType, event: Event, listener: EventListener<Event>) => {
-	eventHandlers[event] ??= {};
-	eventHandlers[event][type] ??= [];
-	eventHandlers[event][type].push(listener);
+	eventListeners[event] ??= {};
+	eventListeners[event][type] ??= [];
+	eventListeners[event][type].push(listener);
 }
 
-export const registerEventHandlers = (client: Client) => {
+export const registerEventListeners = (client: Client) => {
 	let totalCount = 0;
-	for (const [event, { on = [], once = [] }] of Object.entries(eventHandlers)) {
+	for (const [event, { on = [], once = [] }] of Object.entries(eventListeners)) {
 		totalCount += on.length + once.length;
-		for (const handler of on)
-			client.on(event, handler);
-		for (const handler of once)
-			client.once(event, handler);
+		for (const listener of on)
+			client.on(event, listener);
+		for (const listener of once)
+			client.once(event, listener);
 	}
-	logger.complete('Registered %d event handlers.', totalCount);
+	logger.complete('Registered %d event listeners.', totalCount);
 }

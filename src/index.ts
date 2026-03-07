@@ -54,7 +54,7 @@ subscribe('on', Events.InteractionCreate, async (interaction) => {
 	}
 });
 
-registerEventHandlers(client);
+registerEventListeners(client);
 
 (async () => {
 	logger.await('Logging in...');
