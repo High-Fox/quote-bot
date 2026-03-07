@@ -25,7 +25,7 @@ registerCLICommand(['deploy'], 'Deploy slash commands.', (scope: string) => {
 	scope = scope.toLowerCase();
 	if (!['dev', 'global'].includes(scope))
 		return logger.error('Scope must be one of \'global\' or \'dev\'');
-	
+
 	if (scope === 'dev')
 		return deployToGuild({ guildId: config.DEV_GUILD_ID, scope: CommandScopes.DEV});
 	else
@@ -81,7 +81,8 @@ const deployToGuild = async ({ guildId, scope }: GuildDeployOptions) => {
 			Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), { body: commandsData()[scope] }
 		);
 
-		logger.success(`Updated ${scope} slash commands for guild with ID ${guildId}.`);
+		const commandNames = Object.keys(Commands[scope]).join('\', \'');
+		logger.success(`Updated ${commandNames} slash commands for guild with ID ${guildId}.`);
 	} catch (error) {
 		logger.error(error);
 	}
@@ -93,7 +94,8 @@ const deployGlobally = async ({ scope }: DeployOptions = { scope: CommandScopes.
 			Routes.applicationCommands(config.DISCORD_CLIENT_ID), { body: commandsData()[scope] }
 		);
 
-		logger.success(`Updated ${scope} global slash commands.`);
+		const commandNames = Object.keys(Commands[scope]).join(', ');
+		logger.success(`Updated ${commandNames} slash commands globally.`);
 	} catch (error) {
 		logger.error(error);
 	}
