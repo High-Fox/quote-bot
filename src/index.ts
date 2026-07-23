@@ -4,7 +4,7 @@ import { getLogger } from './utils';
 import { registerEventListeners, subscribe } from './handlers/event-handler';
 import { registerCLICommand, startCLI } from './handlers/cli-handler';
 import { handleChatCommand, handleContextMenuCommand } from './handlers/command-handler';
-import './database';
+import { connection as db } from './database';
 import './handlers/quote-handler';
 
 const logger = getLogger('main');
@@ -25,7 +25,7 @@ export const client = new Client({
 registerCLICommand(['stop', 'exit'], 'Stops the process.', async function() {
 	this.close();
 	await client.destroy();
-	return process.exit();
+	await db.close();
 });
 
 subscribe('once', Events.ClientReady, async (readyClient) => {

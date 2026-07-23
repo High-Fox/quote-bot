@@ -3,7 +3,7 @@ import { stdin, stdout } from 'node:process';
 import { createInterface, Interface } from 'node:readline';
 
 const logger = getLogger('cli');
-type CLICommandHandler = (this: Interface, ...args: string[]) => Promise<unknown> | unknown;
+type CLICommandHandler = (this: InterfaceWrapper, ...args: string[]) => Promise<unknown> | unknown;
 interface CLICommand {
 	names: string[],
 	description: string,
@@ -51,48 +51,67 @@ export const registerCLICommand = (names: [string, ...string[]], description: st
 	cliCommands[name] = { names, description, args, handler };
 }
 
-registerCLICommand(['help'], 'Displays this message.', () => {
-	for (const { names, description, args } of Object.values(cliCommands))
-		logger.log(`${names.join('/')} ${args.map((argName) => `[${argName}]`).join(' ')} - ${description}`);
-});
-
-export const startCLI = () => {
-	const interf = createInterface({
-		input: stdin,
-		output: stdout
-	});
-	
-	logger.log('Type \'help\' for list of commands.');
-
-	interf.prompt();
-	interf.on('line', async (input) => {
-		interf.pause();
-		if (!input.trim().length)
-			return interf.prompt();
-
-		const { commandName, args } = parseCommand(input);
-		const command = cliCommands[commandName] || cliCommands[aliasLookup[commandName]];
-		if (!command) {
-			logger.log(`Unknown command '${commandName}'.`);
-			return interf.prompt();
-		}
-
-		const { args: requiredArgs, handler } = command;
-		if (requiredArgs.length > args.length) {
-			const missingArgs = requiredArgs.slice(args.length);
-			logger.log(`Missing arguments: ${missingArgs.join(', ')}.`);
-			return interf.prompt();
-		}
-
-		await handler.call(interf, ...args);
-		return interf.prompt();
-	});
-}
-
 const parseCommand = (input: string) => {
 	const splitInput = input.trim().split(' ');
 	return {
 		commandName: splitInput[0],
 		args: splitInput.slice(1)
 	}
+}
+
+registerCLICommand(['help'], 'Displays this message.', () => {
+	for (const { names, description, args } of Object.values(cliCommands))
+		logger.log(`${names.join('/')} ${args.map((argName) => `[${argName}]`).join(' ')} - ${description}`);
+});
+
+class InterfaceWrapper {
+	private interf: Interface;
+	closed = false;
+
+	constructor(input: NodeJS.ReadableStream, output: NodeJS.WritableStream) {
+		this.interf = createInterface({ input, output });
+	}
+
+	start() {
+		logger.log('Type \'help\' for list of commands.');
+
+		this.interf.prompt();
+		this.interf.on('line', async (input) => {
+			this.interf.pause();
+			await this.onInput(input);
+			if (!this.closed)
+				return this.interf.prompt();
+		});
+	}
+
+	private onInput(input: string) {
+		if (!input.trim().length)
+			return this.interf.prompt();
+
+		const { commandName, args } = parseCommand(input);
+		const command = cliCommands[commandName] || cliCommands[aliasLookup[commandName]];
+		if (!command) {
+			logger.log(`Unknown command '${commandName}'.`);
+			return this.interf.prompt();
+		}
+
+		const { args: requiredArgs, handler } = command;
+		if (requiredArgs.length > args.length) {
+			const missingArgs = requiredArgs.slice(args.length);
+			logger.log(`Missing arguments: ${missingArgs.join(', ')}.`);
+			return this.interf.prompt();
+		}
+
+		return handler.call(this, ...args);
+	}
+
+	close() {
+		this.closed = true;
+		this.interf.close();
+	}
+}
+
+export const startCLI = () => {
+	const cli = new InterfaceWrapper(stdin, stdout);
+	cli.start();
 }

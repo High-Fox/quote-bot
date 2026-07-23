@@ -3,7 +3,7 @@ import { Command } from '..';
 import { newMessage, updateMessage } from '../../handlers/quote-handler';
 import { getLogger } from '../../utils';
 import { updateScoreboard } from '../../handlers/scoreboard-handler';
-import * as db from '../../database'
+import * as db from '../../database';
 
 const logger = getLogger('command', 'update');
 export const update: Command = {

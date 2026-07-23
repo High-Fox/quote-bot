@@ -25,7 +25,7 @@ export interface MessageContextMenuCommand extends SerializableCommand<ContextMe
 	execute: CommandFunction<MessageContextMenuCommandInteraction<'raw' | 'cached'>>
 };
 export interface UserContextMenuCommand extends SerializableCommand<ContextMenuCommandBuilder> {
-	type: ApplicationCommandType.User
+	type: ApplicationCommandType.User,
 	execute: CommandFunction<UserContextMenuCommandInteraction<'raw' | 'cached'>>
 };
 
