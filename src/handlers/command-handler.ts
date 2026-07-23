@@ -81,7 +81,7 @@ const deployToGuild = async ({ guildId, scope }: GuildDeployOptions) => {
 			Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), { body: commandsData()[scope] }
 		);
 
-		const commandNames = Object.keys(Commands[scope]).join('\', \'');
+		const commandNames = '\'' + Object.keys(Commands[scope]).join('\', \'') + '\'';
 		logger.success(`Updated ${commandNames} slash commands for guild with ID ${guildId}.`);
 	} catch (error) {
 		logger.error(error);
@@ -94,7 +94,7 @@ const deployGlobally = async ({ scope }: DeployOptions = { scope: CommandScopes.
 			Routes.applicationCommands(config.DISCORD_CLIENT_ID), { body: commandsData()[scope] }
 		);
 
-		const commandNames = Object.keys(Commands[scope]).join(', ');
+		const commandNames = '\'' + Object.keys(Commands[scope]).join(', ') + '\'';
 		logger.success(`Updated ${commandNames} slash commands globally.`);
 	} catch (error) {
 		logger.error(error);
